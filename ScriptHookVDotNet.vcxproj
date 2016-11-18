@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{019193A7-50C0-444A-84CA-777595E702CD}</ProjectGuid>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>GTA</RootNamespace>
   </PropertyGroup>
@@ -44,6 +45,7 @@
   <!-- Global compilation settings -->
   <PropertyGroup>
     <TargetExt>.asi</TargetExt>
+    <TargetName>ScriptHookVDotNet3</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -55,6 +57,10 @@
       <AdditionalLibraryDirectories>sdk\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ScriptHookV.lib;$(IntDir)$(TargetName).netmodule;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <CsCompile>
+      <LangVersion>5</LangVersion>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </CsCompile>
     <Xdcmake>
       <AdditionalDocumentFile>$(IntDir)$(TargetName).xdc;%(AdditionalDocumentFile)</AdditionalDocumentFile>
     </Xdcmake>
@@ -88,6 +94,7 @@
   <!-- Core source files -->
   <ItemGroup>
     <ClCompile Include="source\AssemblyInfo.cpp" />
+    <ClCompile Include="source\core\Console.cpp" />
     <ClCompile Include="source\core\Main.cpp" />
     <ClCompile Include="source\core\Native.cpp" />
     <ClCompile Include="source\core\NativeMemory.cpp" />
@@ -96,6 +103,7 @@
     <ClCompile Include="source\core\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\core\Console.hpp" />
     <ClInclude Include="source\core\Native.hpp" />
     <ClInclude Include="source\core\NativeHashes.hpp" />
     <ClInclude Include="source\core\NativeMemory.hpp" />
@@ -119,10 +127,15 @@
   <ItemGroup>
     <CsCompile Include="source\scripting\Audio.cs" />
     <CsCompile Include="source\scripting\Blip.cs" />
-    <CsCompile Include="source\scripting\Bone.cs" />
+    <CsCompile Include="source\scripting\BoneID.cs" />
     <CsCompile Include="source\scripting\Camera.cs" />
     <CsCompile Include="source\scripting\ButtonCombination.cs" />
     <CsCompile Include="source\scripting\Checkpoint.cs" />
+    <CsCompile Include="source\scripting\DlcWeaponStructs.cs" />
+    <CsCompile Include="source\scripting\EntityBone.cs" />
+    <CsCompile Include="source\scripting\EntityBoneCollection.cs" />
+    <CsCompile Include="source\scripting\PedBone.cs" />
+    <CsCompile Include="source\scripting\PedBoneCollection.cs" />
     <CsCompile Include="source\scripting\Style.cs" />
     <CsCompile Include="source\scripting\Controls.cs" />
     <CsCompile Include="source\scripting\Entity.cs" />
@@ -174,14 +187,13 @@
   <!-- Compile C# source files -->
   <Target Name="CsCompile" DependsOnTargets="ClCompile" BeforeTargets="Link" AfterTargets="ClCompile" Inputs="@(CsCompile)" Outputs="$(IntDir)$(TargetName).netmodule">
     <Message Text="Compiling scripting API" />
-    <Csc Sources="@(CsCompile)" AddModules="$(IntDir)Main.obj" TargetType="Module" Optimize="%(CsCompile.Optimize)" DisabledWarnings="%(CsCompile.NoWarn)" OutputAssembly="$(IntDir)$(TargetName).netmodule" DocumentationFile="$(IntDir)$(TargetName).xdc" Condition="'@(CsCompile)' != ''" />
+    <Csc Sources="@(CsCompile)" AddModules="$(IntDir)Main.obj" TargetType="Module" Optimize="%(CsCompile.Optimize)" LangVersion="%(CsCompile.LangVersion)" AllowUnsafeBlocks="%(CsCompile.AllowUnsafeBlocks)" DisabledWarnings="%(CsCompile.NoWarn)" OutputAssembly="$(IntDir)$(TargetName).netmodule" DocumentationFile="$(IntDir)$(TargetName).xdc" Condition="'@(CsCompile)' != ''" />
   </Target>
   <!-- Rename and move output files -->
-  <Target Name="MoveFiles" AfterTargets="AfterBuild">
+  <Target Name="MoveFiles" AfterTargets="AfterBuild" Condition="'$(Configuration)' != 'NativeGen'">
     <MakeDir Directories="$(TargetDir)SDK" Condition="!Exists('$(TargetDir)SDK')" />
     <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(TargetDir)SDK\$(TargetName).dll" />
     <Move SourceFiles="$(TargetDir)$(TargetName).xml" DestinationFolder="$(TargetDir)SDK\" />
-    <Message Text="Moving output files..." />
   </Target>
   <!-- Verify SDK files exist before generating anything -->
   <Target Name="VerifySDKFiles" BeforeTargets="BeforeBuildGenerateSources">

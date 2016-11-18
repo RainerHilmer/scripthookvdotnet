@@ -12,17 +12,23 @@ namespace GTA
 		internal:
 			static int GetGameVersion();
 
+			static char ReadSByte(System::IntPtr address);
 			static unsigned char ReadByte(System::IntPtr address);
 			static short ReadShort(System::IntPtr address);
+			static unsigned short ReadUShort(System::IntPtr address);
 			static int ReadInt(System::IntPtr address);
+			static unsigned int ReadUInt(System::IntPtr address);
 			static float ReadFloat(System::IntPtr address);
 			static Math::Vector3 ReadVector3(System::IntPtr address);
 			static System::String ^ReadString(System::IntPtr address);
 			static System::IntPtr ReadPtr(System::IntPtr address);
 			static Math::Matrix ReadMatrix(System::IntPtr address);
+			static void WriteSByte(System::IntPtr address, char value);
 			static void WriteByte(System::IntPtr address, unsigned char value);
 			static void WriteShort(System::IntPtr address, short value);
+			static void WriteUShort(System::IntPtr address, unsigned short value);
 			static void WriteInt(System::IntPtr address, int value);
+			static void WriteUInt(System::IntPtr address, unsigned int value);
 			static void WriteFloat(System::IntPtr address, float value);
 			static void WriteVector3(System::IntPtr address, Math::Vector3 value);
 			static void SetBit(System::IntPtr address, int bit);
@@ -35,8 +41,12 @@ namespace GTA
 			static System::IntPtr GetCheckpointAddress(int handle);
 			static System::IntPtr GetEntityBoneMatrixAddress(int handle, int boneIndex);
 			static System::IntPtr GetPtfxAddress(int handle);
+			static int GetEntityBoneCount(int handle);
 			static float ReadWorldGravity();
 			static void WriteWorldGravity(float value);
+			static int ReadCursorSprite();
+			static System::IntPtr GetGameplayCameraAddress();
+			static System::IntPtr GetCameraAddress(int handle);
 
 			static array<int> ^GetEntityHandles();
 			static array<int> ^GetEntityHandles(Math::Vector3 position, float radius);
@@ -47,6 +57,9 @@ namespace GTA
 			static array<int> ^GetPropHandles(array<int> ^modelhashes);
 			static array<int> ^GetPropHandles(Math::Vector3 position, float radius, array<int> ^modelhashes);
 			static array<int> ^GetCheckpointHandles();
+			static array<int> ^GetPickupObjectHandles();
+			static array<int> ^GetPickupObjectHandles(Math::Vector3 position, float radius);
+			static int GetNumberOfVehicles();
 
 			static void SendEuphoriaMessage(int targetHandle, System::String ^message, System::Collections::Generic::Dictionary<System::String ^, System::Object ^> ^_arguments);
 
@@ -60,7 +73,7 @@ namespace GTA
 			static int(*_addEntityToPoolFunc)(System::UInt64 address);
 			static System::UInt64(*_entityPositionFunc)(System::UInt64 address, float *position);
 			static System::UInt64(*_entityModel1Func)(System::UInt64 address), (*_entityModel2Func)(System::UInt64 address);
-			static System::UInt64 *_entityPoolAddress, *_vehiclePoolAddress, *_pedPoolAddress, *_objectPoolAddress;
+			static System::UInt64 *_entityPoolAddress, *_vehiclePoolAddress, *_pedPoolAddress, *_objectPoolAddress, *_cameraPoolAddress, *_pickupObjectPoolAddress;
 			static unsigned char(*SetNmBoolAddress)(__int64, __int64, unsigned char);
 			static unsigned char(*SetNmIntAddress)(__int64, __int64, int);
 			static unsigned char(*SetNmFloatAddress)(__int64, __int64, float);
@@ -71,6 +84,7 @@ namespace GTA
 			static System::UInt64(*CheckpointHandleAddr)(System::UInt64 baseAddr, int Handle);
 			static System::UInt64 *checkpointPoolAddress;
 			static float *_readWorldGravityAddr, *_writeWorldGravityAddr;
+			static System::UInt64 *_gamePlayCameraAddr;
 			static property System::Collections::ObjectModel::ReadOnlyCollection<System::Collections::ObjectModel::ReadOnlyCollection<int> ^> ^VehicleModels
 			{
 				System::Collections::ObjectModel::ReadOnlyCollection<System::Collections::ObjectModel::ReadOnlyCollection<int> ^> ^get()
@@ -79,7 +93,20 @@ namespace GTA
 				}
 			}
 			static bool IsModelAPed(int modelHash);
+			static int* _cursorSpriteAddr;
+			static property System::IntPtr CellEmailBcon{
+				System::IntPtr get();
+			}
+			static property System::IntPtr StringPtr {
+				System::IntPtr get();
+			}
+			static property System::IntPtr NullString {
+				System::IntPtr get();
+			}
 		private:
+			static System::IntPtr _cellEmailBconPtr;
+			static System::IntPtr _stringPtr;
+			static System::IntPtr _nullString;
 			static MemoryAccess();
 			static void GenerateVehicleModelList();
 			static System::UInt64 modelHashTable, modelNum2, modelNum3, modelNum4;
