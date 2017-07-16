@@ -21,21 +21,21 @@ using namespace System;
 using namespace System::Reflection;
 namespace WinForms = System::Windows::Forms;
 
-ref struct ScriptHookVDotNet
+ref class ScriptHookVDotNet abstract
 {
-	static GTA::ScriptDomain ^Domain = nullptr;
-
+public:
 	static bool Init()
 	{
-		if (!Object::ReferenceEquals(Domain, nullptr))
+		if (Domain != nullptr)
 		{
 			GTA::ScriptDomain::Unload(Domain);
 		}
 
 		auto settings = GTA::ScriptSettings::Load(IO::Path::ChangeExtension(Assembly::GetExecutingAssembly()->Location, ".ini"));
-		Domain = GTA::ScriptDomain::Load(settings->GetValue<String ^>(String::Empty, "ScriptsLocation", "scripts"));
+		Domain = GTA::ScriptDomain::Load(settings->GetValue(String::Empty, "ScriptsLocation", "scripts"));
+		ReloadKey = settings->GetValue<WinForms::Keys>(String::Empty, "ReloadKey", WinForms::Keys::Insert);
 
-		if (!Object::ReferenceEquals(Domain, nullptr))
+		if (Domain != nullptr)
 		{
 			Domain->Start();
 
@@ -46,16 +46,28 @@ ref struct ScriptHookVDotNet
 	}
 	static void Tick()
 	{
-		Domain->DoTick();
+		if (Domain != nullptr)
+		{
+			if (Domain->IsKeyPressed(ReloadKey))
+			{
+				Init();
+			}
+			else
+			{
+				Domain->DoTick();
+			}
+		}
 	}
 
 	static void KeyboardMessage(WinForms::Keys key, bool status, bool statusCtrl, bool statusShift, bool statusAlt)
 	{
-		if (Object::ReferenceEquals(Domain, nullptr))
+		if (Domain != nullptr)
 		{
-			return;
+			Domain->DoKeyboardMessage(key, status, statusCtrl, statusShift, statusAlt);
 		}
-
-		Domain->DoKeyboardMessage(key, status, statusCtrl, statusShift, statusAlt);
 	}
+
+private:
+	static WinForms::Keys ReloadKey = WinForms::Keys::None;
+	static GTA::ScriptDomain ^Domain = nullptr;
 };
