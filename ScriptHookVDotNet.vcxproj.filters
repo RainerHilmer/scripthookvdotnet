@@ -114,6 +114,9 @@
     <ClCompile Include="source\scripting\Audio.cpp">
       <Filter>scripting\Game</Filter>
     </ClCompile>
+    <ClCompile Include="source\scripting\Menu.cpp">
+      <Filter>scripting\UI</Filter>
+    </ClCompile>
     <ClCompile Include="source\scripting\WeaponAsset.cpp">
       <Filter>scripting\World</Filter>
     </ClCompile>
@@ -227,6 +230,9 @@
     </ClInclude>
     <ClInclude Include="source\scripting\Audio.hpp">
       <Filter>scripting\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="source\scripting\Menu.hpp">
+      <Filter>scripting\UI</Filter>
     </ClInclude>
     <ClInclude Include="source\scripting\Interface.hpp">
       <Filter>scripting</Filter>
