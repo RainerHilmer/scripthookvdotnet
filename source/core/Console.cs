@@ -461,7 +461,7 @@ namespace GTA
 
 			if (now.Millisecond < 500)
 			{
-				float length = GetTextLength(_input.Substring(0, _input.Length - _cursorPos), DefaultScale, DefaultFont);
+				float length = GetTextLength(_input.Substring(0, _cursorPos), DefaultScale, DefaultFont);
 				DrawText(25 + (length * WIDTH) - 4, HEIGHT / 3, "~w~~h~|~w~", DefaultScale, DefaultFont, InputColor);
 			}
 
@@ -505,6 +505,36 @@ namespace GTA
 				PageDown();
 				return;
 			}
+			else if (e.Control)
+			{
+				switch (e.KeyCode)
+				{
+					case Keys.A:
+						MoveCursorToStartOfLine();
+						return;
+					case Keys.B:
+						MoveCursorLeft();
+						return;
+					case Keys.E:
+						MoveCursorToEndOfLine();
+						return;
+					case Keys.F:
+						MoveCursorRight();
+						return;
+					case Keys.L:
+						Clear();
+						return;
+					case Keys.N:
+						GoDownCommandList();
+						return;
+					case Keys.P:
+						GoUpCommandList();
+						return;
+					case Keys.V:
+						PasteClipboard();
+						return;
+				}
+			}
 
 			switch (e.KeyCode)
 			{
@@ -525,16 +555,6 @@ namespace GTA
 					break;
 				case Keys.Down:
 					GoDownCommandList();
-					break;
-				case Keys.V:
-					if (e.Control)
-					{
-						PasteClipboard();
-					}
-					else
-					{
-						AddToInput(GetCharsFromKeys(e.KeyCode, e.Shift, e.Alt));
-					}
 					break;
 				case Keys.Enter:
 					ExecuteInput();
@@ -557,7 +577,8 @@ namespace GTA
 				return;
 			}
 
-			_input = _input.Insert(_input.Length - _cursorPos, input);
+			_input = _input.Insert(_cursorPos, input);
+			_cursorPos++;
 		}
 		private void AddClipboardContent()
 		{
@@ -651,39 +672,35 @@ namespace GTA
 
 		private void MoveCursorLeft()
 		{
-			if (_cursorPos < _input.Length)
-				_cursorPos++;
-		}
-		private void MoveCursorRight()
-		{
 			if (_cursorPos > 0)
 				_cursorPos--;
 		}
+		private void MoveCursorRight()
+		{
+			if (_cursorPos < _input.Length)
+				_cursorPos++;
+		}
+		private void MoveCursorToStartOfLine()
+		{
+			_cursorPos = 0;
+		}
+		private void MoveCursorToEndOfLine()
+		{
+			_cursorPos = _input.Length;
+		}
 		private void RemoveCharLeft()
 		{
-			if (_input.Length > 0)
+			if (_input.Length > 0 && _cursorPos > 0)
 			{
-				int startIndex = _input.Length - _cursorPos - 1;
-				if (startIndex < _input.Length && startIndex >= 0)
-				{
-					_input = _input.Remove(startIndex, 1);
-				}
+				_input = _input.Remove(_cursorPos - 1, 1);
+				_cursorPos--;
 			}
 		}
 		private void RemoveCharRight()
 		{
-			if (_input.Length > 0 && _cursorPos <= _input.Length)
+			if (_input.Length > 0 && _cursorPos < _input.Length)
 			{
-				int startIndex = _input.Length - _cursorPos;
-				if (startIndex < _input.Length && startIndex >= 0)
-				{
-					_input = _input.Remove(_input.Length - _cursorPos, 1);
-				}
-			}
-
-			if (_cursorPos > 0)
-			{
-				_cursorPos--;
+				_input = _input.Remove(_cursorPos, 1);
 			}
 		}
 		private void PageUp()
@@ -732,7 +749,7 @@ namespace GTA
 			Native.Function.Call(Native.Hash.SET_TEXT_FONT, font);
 			Native.Function.Call(Native.Hash.SET_TEXT_SCALE, scale, scale);
 			Native.Function.Call(Native.Hash.SET_TEXT_COLOUR, color.R, color.G, color.B, color.A);
-			Native.Function.Call(Native.Hash.BEGIN_TEXT_COMMAND_DISPLAY_TEXT, "STRING");
+			Native.Function.Call(Native.Hash.BEGIN_TEXT_COMMAND_DISPLAY_TEXT, "CELL_EMAIL_BCON");
 
 			const int maxStringLength = 99;
 
